@@ -1,0 +1,6 @@
+team_name,status,project_name,owner,start_date,target_date,percent_complete,notes,completed_date,outcome
+Marketing Team,in_progress,Website Redesign,Alex Kim,2026-01-10,2026-05-01,0.65,On track; new homepage mockups approved.,,
+Marketing Team,in_progress,Spring Newsletter Series,Jordan Lee,2026-02-01,2026-04-15,0.4,Two of five issues drafted.,,
+Marketing Team,completed,Customer Survey 2025,Priya Patel,2025-09-01,,,,2025-11-15,"Collected 1,200 responses; results shared with leadership."
+Engineering Team,in_progress,Mobile App Launch,Sam Rivera,2026-01-15,2026-06-01,0.3,Beta testing begins next sprint.,,
+Engineering Team,completed,API Performance Upgrade,Taylor Brooks,2025-10-01,,,,2026-01-20,"Reduced average response time by 40%."

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporting Demo</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <main class="wrap">
+    <h1>Reporting Demo</h1>
+    <p class="lede">
+      Upload a spreadsheet and download a personalized PowerPoint/PDF report for
+      each team &mdash; a small demo of the spreadsheet-to-deck workflow.
+      Don't have a spreadsheet yet? <a href="/static/report_template.xlsx">Download the template</a>.
+    </p>
+
+    <form id="generate-form" action="/generate" method="post" enctype="multipart/form-data">
+      <label class="field">
+        <span>Project spreadsheet (.xlsx or .csv)</span>
+        <input type="file" name="spreadsheet" accept=".xlsx,.xlsm,.xls,.csv" required />
+      </label>
+
+      <label class="field">
+        <span>Report period label (shown on the cover slide)</span>
+        <input type="text" name="report_period" value="Q2 2026" />
+      </label>
+
+      <fieldset class="field">
+        <legend>Output formats</legend>
+        <label class="checkbox">
+          <input type="checkbox" name="output_formats" value="pptx" checked /> PowerPoint (.pptx)
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" name="output_formats" value="pdf" checked /> PDF
+        </label>
+      </fieldset>
+
+      <button type="submit">Generate Reports</button>
+    </form>
+
+    <p id="status" class="status" hidden></p>
+
+    <section class="schema">
+      <h2>Spreadsheet format</h2>
+      <p>One row per team per project. Required columns: <code>team_name</code>,
+      <code>status</code> (<code>in_progress</code> or <code>completed</code>), <code>project_name</code>.</p>
+      <details>
+        <summary>Full column reference</summary>
+        <table>
+          <thead><tr><th>Column</th><th>Used for</th><th>Notes</th></tr></thead>
+          <tbody>
+            <tr><td>team_name</td><td>all</td><td>required</td></tr>
+            <tr><td>status</td><td>all</td><td>required: in_progress | completed</td></tr>
+            <tr><td>project_name</td><td>all</td><td>required</td></tr>
+            <tr><td>owner</td><td>all</td><td></td></tr>
+            <tr><td>start_date</td><td>all</td><td></td></tr>
+            <tr><td>target_date</td><td>in_progress</td><td></td></tr>
+            <tr><td>percent_complete</td><td>in_progress</td><td>e.g. 0.6 or 60 or "60%"</td></tr>
+            <tr><td>notes</td><td>in_progress</td><td></td></tr>
+            <tr><td>completed_date</td><td>completed</td><td></td></tr>
+            <tr><td>outcome</td><td>completed</td><td></td></tr>
+          </tbody>
+        </table>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    const form = document.getElementById('generate-form');
+    const status = document.getElementById('status');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      status.hidden = false;
+      status.textContent = 'Generating reports…';
+      status.className = 'status working';
+
+      const formData = new FormData(form);
+      try {
+        const res = await fetch('/generate', { method: 'POST', body: formData });
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.detail || `Request failed (${res.status})`);
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reports.zip';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        status.textContent = 'Done — your download should start automatically.';
+        status.className = 'status success';
+      } catch (err) {
+        status.textContent = 'Error: ' + err.message;
+        status.className = 'status error';
+      }
+    });
+  </script>
+</body>
+</html>
